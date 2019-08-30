@@ -10,7 +10,7 @@ ext {
     libraryName="searchedittext"
     publishedGroupId="com.umalt.searchedittext"
     artifact="searchedittext"
-    libraryVersion="0.0.1"
+    libraryVersion="0.0.2"
     libraryDescription="Custom EditText for search"
     siteUrl="https://github.com/Umalt/SearchEditText"
     gitUrl="https://github.com/Umalt/SearchEditText.git"

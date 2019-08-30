@@ -1,5 +1,6 @@
 package com.umalt.searchedittext
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -12,10 +13,13 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 
+
 /**
  * Created by Umalt on 26.08.2019.
  */
 class SearchEditText : AppCompatEditText {
+
+    private var clearIconAlpha = 0
 
     private var iconTouchedDown: Boolean = false
 
@@ -70,7 +74,10 @@ class SearchEditText : AppCompatEditText {
         searchIconDrawable?.draw(canvas)
 
         if (isClearIconVisible) {
-            clearIconDrawable?.draw(canvas)
+            clearIconDrawable?.apply {
+                alpha = clearIconAlpha
+                draw(canvas)
+            }
         }
     }
 
@@ -84,6 +91,15 @@ class SearchEditText : AppCompatEditText {
 
         val textLength = text?.length ?: 0
         isClearIconVisible = textLength > 0
+
+        if (textLength > 0 && clearIconAlpha == 0) {
+            startClearIconAnimation()
+        }
+
+        if (textLength == 0) {
+            clearIconDrawable?.alpha = 0
+            clearIconAlpha = 0
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -91,10 +107,11 @@ class SearchEditText : AppCompatEditText {
         clearIconDrawable?.let {
             if (isClearIconVisible) {
                 val rectIconWithPaddings = Rect(it.bounds).apply {
-                    val inset = - (VERTICAL_PADDING_DP * density).toInt()
+                    val inset = -(VERTICAL_PADDING_DP * density).toInt()
                     inset(inset, inset)
                 }
-                val isTouchInIconBounds = rectIconWithPaddings.contains(event.x.toInt() + scrollX, event.y.toInt())
+                val isTouchInIconBounds =
+                    rectIconWithPaddings.contains(event.x.toInt() + scrollX, event.y.toInt())
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     if (isTouchInIconBounds) {
                         iconTouchedDown = true
@@ -115,7 +132,8 @@ class SearchEditText : AppCompatEditText {
     }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.SearchEditText, defStyle, 0)
+        val typedArray =
+            context.obtainStyledAttributes(attrs, R.styleable.SearchEditText, defStyle, 0)
 
         val bgColor = typedArray.getColor(
             R.styleable.SearchEditText_set_background_color,
@@ -132,14 +150,17 @@ class SearchEditText : AppCompatEditText {
             typedArray.hasValue(R.styleable.SearchEditText_set_icon_clear) ->
                 typedArray.getDrawable(R.styleable.SearchEditText_set_icon_clear)
             else -> ContextCompat.getDrawable(context, R.drawable.ic_vector_clear)
+        }?.apply {
+            alpha = clearIconAlpha
         }
 
         typedArray.recycle()
 
-        background = ContextCompat.getDrawable(context, R.drawable.shape_solid_white61c_grey_rounded_48dp)
-            ?.apply {
-                DrawableCompat.setTint(DrawableCompat.wrap(this), bgColor)
-            }
+        background =
+            ContextCompat.getDrawable(context, R.drawable.shape_solid_white61c_grey_rounded_48dp)
+                ?.apply {
+                    DrawableCompat.setTint(DrawableCompat.wrap(this), bgColor)
+                }
 
         setPaddings()
     }
@@ -180,6 +201,17 @@ class SearchEditText : AppCompatEditText {
             right.toInt(),
             verticalPadding.toInt()
         )
+    }
+
+    private fun startClearIconAnimation() {
+        ValueAnimator.ofInt(0, 255).apply {
+            duration = 1000
+            addUpdateListener {
+                clearIconAlpha = it.animatedValue as Int
+                invalidate()
+            }
+            start()
+        }
     }
 
     companion object {
