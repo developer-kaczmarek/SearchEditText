@@ -5,18 +5,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <com.umalt.searchedittext.SearchEditText
+        android:id="@+id/set_city"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         android:hint="@string/hint_search_city"
-        android:maxLines="1"
         android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:maxLines="1" />
+
+    <com.umalt.searchedittext.SearchEditText
+        android:id="@+id/set_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:hint="@string/hint_search_address"
+        android:inputType="text"
+        android:maxLines="1"
+        app:drawable_start="@drawable/ic_vector_back" />
 
 </LinearLayout>

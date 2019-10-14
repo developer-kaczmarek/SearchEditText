@@ -3,8 +3,8 @@
 
     <declare-styleable name="SearchEditText">
         <attr name="set_background_color" format="color" />
-        <attr name="set_icon_search" format="reference" />
-        <attr name="set_icon_clear" format="reference" />
+        <attr name="drawable_start" format="reference" />
+        <attr name="drawable_end" format="reference" />
     </declare-styleable>
 
 </resources>

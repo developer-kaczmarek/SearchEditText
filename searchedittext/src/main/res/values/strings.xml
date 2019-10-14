@@ -2,4 +2,5 @@
     <string name="app_name">SearchEditText</string>
 
     <string name="hint_search_city">Введите название города</string>
+    <string name="hint_search_address">Введите адрес</string>
 </resources>

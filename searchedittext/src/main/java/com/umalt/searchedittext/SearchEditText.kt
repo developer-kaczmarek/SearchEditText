@@ -19,23 +19,23 @@ import androidx.core.graphics.drawable.DrawableCompat
  */
 class SearchEditText : AppCompatEditText {
 
-    private var clearIconAlpha = 0
+    private var drawableEndAlpha = 0
 
-    private var iconTouchedDown: Boolean = false
-
-    private var isClearIconVisible = false
+    private var isDrawableEndVisible = false
         set(value) {
             field = value
             requestLayout()
         }
 
-    private var clearIconDrawable: Drawable? = null
+    var onDrawableStartTouch: OnDrawableStartTouchListener? = null
+
+    private var drawableEnd: Drawable? = null
         set(value) {
             field = value
             requestLayout()
         }
 
-    private var searchIconDrawable: Drawable? = null
+    private var drawableStart: Drawable? = null
         set(value) {
             field = value
             requestLayout()
@@ -68,14 +68,14 @@ class SearchEditText : AppCompatEditText {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        setClearIconBounds()
-        setSearchIconBounds()
+        setDrawableEndBounds()
+        setDrawableStartBounds()
 
-        searchIconDrawable?.draw(canvas)
+        drawableStart?.draw(canvas)
 
-        if (isClearIconVisible) {
-            clearIconDrawable?.apply {
-                alpha = clearIconAlpha
+        if (isDrawableEndVisible) {
+            drawableEnd?.apply {
+                alpha = drawableEndAlpha
                 draw(canvas)
             }
         }
@@ -90,42 +90,27 @@ class SearchEditText : AppCompatEditText {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
 
         val textLength = text?.length ?: 0
-        isClearIconVisible = textLength > 0
+        isDrawableEndVisible = textLength > 0
 
-        if (textLength > 0 && clearIconAlpha == 0) {
-            startClearIconAnimation()
+        if (textLength > 0 && drawableEndAlpha == 0) {
+            startDrawableEndAnimation()
         }
 
         if (textLength == 0) {
-            clearIconDrawable?.alpha = 0
-            clearIconAlpha = 0
+            drawableEnd?.alpha = 0
+            drawableEndAlpha = 0
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        clearIconDrawable?.let {
-            if (isClearIconVisible) {
-                val rectIconWithPaddings = Rect(it.bounds).apply {
-                    val inset = -(VERTICAL_PADDING_DP * density).toInt()
-                    inset(inset, inset)
-                }
-                val isTouchInIconBounds =
-                    rectIconWithPaddings.contains(event.x.toInt() + scrollX, event.y.toInt())
-                if (event.action == MotionEvent.ACTION_DOWN) {
-                    if (isTouchInIconBounds) {
-                        iconTouchedDown = true
-                        return true
-                    }
-                    iconTouchedDown = false
-                } else if (event.action == MotionEvent.ACTION_UP) {
-                    if (isTouchInIconBounds) {
-                        text = null
-                        return true
-                    }
-                    iconTouchedDown = false
-                }
-            }
+        val isTouchInDrawableEndBounds = drawableEnd?.isTouchInIconBounds(event) ?: false
+        val isTouchInDrawableStartBounds = drawableStart?.isTouchInIconBounds(event) ?: false
+
+        if (isTouchInDrawableEndBounds) {
+            touchDrawableEnd(event)
+        } else if (isTouchInDrawableStartBounds) {
+            touchDrawableStart(event)
         }
 
         return super.onTouchEvent(event)
@@ -140,18 +125,18 @@ class SearchEditText : AppCompatEditText {
             ContextCompat.getColor(context, R.color.white_61c)
         )
 
-        searchIconDrawable = when {
-            typedArray.hasValue(R.styleable.SearchEditText_set_icon_search) ->
-                typedArray.getDrawable(R.styleable.SearchEditText_set_icon_search)
+        drawableStart = when {
+            typedArray.hasValue(R.styleable.SearchEditText_drawable_start) ->
+                typedArray.getDrawable(R.styleable.SearchEditText_drawable_start)
             else -> ContextCompat.getDrawable(context, R.drawable.ic_vector_search)
         }
 
-        clearIconDrawable = when {
-            typedArray.hasValue(R.styleable.SearchEditText_set_icon_clear) ->
-                typedArray.getDrawable(R.styleable.SearchEditText_set_icon_clear)
+        drawableEnd = when {
+            typedArray.hasValue(R.styleable.SearchEditText_drawable_end) ->
+                typedArray.getDrawable(R.styleable.SearchEditText_drawable_end)
             else -> ContextCompat.getDrawable(context, R.drawable.ic_vector_clear)
         }?.apply {
-            alpha = clearIconAlpha
+            alpha = drawableEndAlpha
         }
 
         typedArray.recycle()
@@ -165,8 +150,42 @@ class SearchEditText : AppCompatEditText {
         setPaddings()
     }
 
-    private fun setSearchIconBounds() {
-        searchIconDrawable?.let {
+    private fun touchDrawableEnd(event: MotionEvent): Boolean {
+        drawableEnd?.let {
+            if (isDrawableEndVisible) {
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    return true
+                } else if (event.action == MotionEvent.ACTION_UP) {
+                    text = null
+                    return true
+                }
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    private fun touchDrawableStart(event: MotionEvent): Boolean {
+        drawableStart?.let {
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                return true
+            } else if (event.action == MotionEvent.ACTION_UP) {
+                onDrawableStartTouch?.onStartIconClick()
+                return true
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    private fun Drawable.isTouchInIconBounds(event: MotionEvent): Boolean {
+        val rectIconWithPaddings = Rect(bounds).apply {
+            val inset = -(VERTICAL_PADDING_DP * density).toInt()
+            inset(inset, inset)
+        }
+        return rectIconWithPaddings.contains(event.x.toInt() + scrollX, event.y.toInt())
+    }
+
+    private fun setDrawableStartBounds() {
+        drawableStart?.let {
             val top = height / 2 - ICON_SIZE_DP / 2 * density
             val left = ICON_HORIZONTAL_PADDING_DP * density + scrollX
             val right = left + ICON_SIZE_DP * density
@@ -175,8 +194,8 @@ class SearchEditText : AppCompatEditText {
         }
     }
 
-    private fun setClearIconBounds() {
-        clearIconDrawable?.let {
+    private fun setDrawableEndBounds() {
+        drawableEnd?.let {
             val top = height / 2 - ICON_SIZE_DP / 2 * density
             val right = width - ICON_HORIZONTAL_PADDING_DP * density + scrollX
             val left = right - ICON_SIZE_DP * density
@@ -186,13 +205,13 @@ class SearchEditText : AppCompatEditText {
     }
 
     private fun setPaddings() {
-        val clearIconWidth = when {
-            clearIconDrawable != null && isClearIconVisible -> ICON_SIZE_DP * density
+        val drawableEndWidth = when {
+            drawableEnd != null && isDrawableEndVisible -> ICON_SIZE_DP * density
             else -> 0f
         }
-        val searchIconWidth = searchIconDrawable?.let { ICON_SIZE_DP * density } ?: 0f
-        val left = ICON_SIZE_DP * density + searchIconWidth
-        val right = ICON_SIZE_DP * density + clearIconWidth
+        val drawableStartWidth = drawableStart?.let { ICON_SIZE_DP * density } ?: 0f
+        val left = ICON_SIZE_DP * density + drawableStartWidth
+        val right = ICON_SIZE_DP * density + drawableEndWidth
         val verticalPadding = VERTICAL_PADDING_DP * density
 
         setPadding(
@@ -203,11 +222,11 @@ class SearchEditText : AppCompatEditText {
         )
     }
 
-    private fun startClearIconAnimation() {
+    private fun startDrawableEndAnimation() {
         ValueAnimator.ofInt(0, 255).apply {
             duration = 1000
             addUpdateListener {
-                clearIconAlpha = it.animatedValue as Int
+                drawableEndAlpha = it.animatedValue as Int
                 invalidate()
             }
             start()
