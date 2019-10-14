@@ -5,5 +5,5 @@ package com.umalt.searchedittext
  */
 interface OnDrawableStartTouchListener {
 
-    fun onStartIconClick()
+    fun onDrawableStartTouch()
 }

@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity(), OnDrawableStartTouchListener {
         set_address.onDrawableStartTouch = this
     }
 
-    override fun onStartIconClick() {
+    override fun onDrawableStartTouch() {
         finish()
     }
 }

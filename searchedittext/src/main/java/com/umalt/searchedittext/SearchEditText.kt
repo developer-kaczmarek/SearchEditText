@@ -169,7 +169,7 @@ class SearchEditText : AppCompatEditText {
             if (event.action == MotionEvent.ACTION_DOWN) {
                 return true
             } else if (event.action == MotionEvent.ACTION_UP) {
-                onDrawableStartTouch?.onStartIconClick()
+                onDrawableStartTouch?.onDrawableStartTouch()
                 return true
             }
         }
