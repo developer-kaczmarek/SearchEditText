@@ -5,6 +5,7 @@
         <attr name="set_background_color" format="color" />
         <attr name="drawable_start" format="reference" />
         <attr name="drawable_end" format="reference" />
+        <attr name="drawable_start_padding" format="dimension" />
     </declare-styleable>
 
 </resources>
