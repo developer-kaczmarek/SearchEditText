@@ -35,7 +35,7 @@ class SearchEditText : AppCompatEditText {
             requestLayout()
         }
 
-    private var drawableStart: Drawable? = null
+    var drawableStart: Drawable? = null
         set(value) {
             field = value
             requestLayout()
@@ -43,6 +43,8 @@ class SearchEditText : AppCompatEditText {
 
     private val View.density
         get() = context.resources.displayMetrics.density
+
+    private var drawableStartPadding = 0
 
     constructor(context: Context) : super(context) {
         init(null, 0)
@@ -139,6 +141,10 @@ class SearchEditText : AppCompatEditText {
             alpha = drawableEndAlpha
         }
 
+        drawableStartPadding = typedArray.getDimensionPixelSize(
+            R.styleable.SearchEditText_drawable_start_padding,0
+        )
+
         typedArray.recycle()
 
         background =
@@ -210,7 +216,7 @@ class SearchEditText : AppCompatEditText {
             else -> 0f
         }
         val drawableStartWidth = drawableStart?.let { ICON_SIZE_DP * density } ?: 0f
-        val left = ICON_SIZE_DP * density + drawableStartWidth
+        val left = ICON_SIZE_DP * density + drawableStartWidth + drawableStartPadding
         val right = ICON_SIZE_DP * density + drawableEndWidth
         val verticalPadding = VERTICAL_PADDING_DP * density
 
