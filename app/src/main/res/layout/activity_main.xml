@@ -16,7 +16,8 @@
         android:hint="@string/hint_search_city"
         android:inputType="text"
         android:maxLines="1"
-        app:drawable_start="@drawable/ic_vector_back" />
+        app:disable_default_background="true"
+        app:disable_default_start_drawable="true" />
 
     <com.umalt.searchedittext.SearchEditText
         android:id="@+id/set_address"
@@ -26,6 +27,6 @@
         android:hint="@string/hint_search_address"
         android:inputType="text"
         android:maxLines="1"
-        app:drawable_start_padding="12dp"/>
+        app:drawable_start_padding="12dp" />
 
 </LinearLayout>

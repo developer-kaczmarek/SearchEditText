@@ -6,6 +6,8 @@
         <attr name="drawable_start" format="reference" />
         <attr name="drawable_end" format="reference" />
         <attr name="drawable_start_padding" format="dimension" />
+        <attr name="disable_default_background" format="boolean" />
+        <attr name="disable_default_start_drawable" format="boolean" />
     </declare-styleable>
 
 </resources>
