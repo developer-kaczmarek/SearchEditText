@@ -21,6 +21,9 @@ class SearchEditText : AppCompatEditText {
 
     private var drawableEndAlpha = 0
 
+    private var disableDefaultBackground = false
+    private var disableDefaultStartDrawable = false
+
     private var isDrawableEndVisible = false
         set(value) {
             field = value
@@ -127,10 +130,28 @@ class SearchEditText : AppCompatEditText {
             ContextCompat.getColor(context, R.color.white_61c)
         )
 
+        disableDefaultStartDrawable = when {
+            typedArray.hasValue(R.styleable.SearchEditText_disable_default_start_drawable) ->
+                typedArray.getBoolean(R.styleable.SearchEditText_disable_default_start_drawable, false)
+            else -> false
+        }
+
+        disableDefaultBackground = when {
+            typedArray.hasValue(R.styleable.SearchEditText_disable_default_background) ->
+                typedArray.getBoolean(R.styleable.SearchEditText_disable_default_background, false)
+            else -> false
+        }
+
         drawableStart = when {
             typedArray.hasValue(R.styleable.SearchEditText_drawable_start) ->
                 typedArray.getDrawable(R.styleable.SearchEditText_drawable_start)
-            else -> ContextCompat.getDrawable(context, R.drawable.ic_vector_search)
+            else -> {
+                if (!disableDefaultStartDrawable) {
+                    ContextCompat.getDrawable(context, R.drawable.ic_vector_search)
+                } else {
+                    null
+                }
+            }
         }
 
         drawableEnd = when {
@@ -142,16 +163,19 @@ class SearchEditText : AppCompatEditText {
         }
 
         drawableStartPadding = typedArray.getDimensionPixelSize(
-            R.styleable.SearchEditText_drawable_start_padding,0
+            R.styleable.SearchEditText_drawable_start_padding, 0
         )
 
         typedArray.recycle()
 
-        background =
-            ContextCompat.getDrawable(context, R.drawable.shape_solid_white61c_grey_rounded_48dp)
-                ?.apply {
-                    DrawableCompat.setTint(DrawableCompat.wrap(this), bgColor)
-                }
+        background = when {
+            disableDefaultBackground -> null
+            else ->
+                ContextCompat.getDrawable(context, R.drawable.shape_solid_white61c_grey_rounded_48dp)
+                    ?.apply {
+                        DrawableCompat.setTint(DrawableCompat.wrap(this), bgColor)
+                    }
+        }
 
         setPaddings()
     }
@@ -216,7 +240,7 @@ class SearchEditText : AppCompatEditText {
             else -> 0f
         }
         val drawableStartWidth = drawableStart?.let { ICON_SIZE_DP * density } ?: 0f
-        val left = ICON_SIZE_DP * density + drawableStartWidth + drawableStartPadding
+        val left = 2 * drawableStartWidth + drawableStartPadding
         val right = ICON_SIZE_DP * density + drawableEndWidth
         val verticalPadding = VERTICAL_PADDING_DP * density
 
